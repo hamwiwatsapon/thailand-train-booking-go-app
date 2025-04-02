@@ -26,8 +26,15 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService)
 
 	// Setup routes
+	// Add logging middleware
+	app.Use(func(c *fiber.Ctx) error {
+		println("Request:", c.Method(), c.Path())
+		return c.Next()
+	})
+
+	// Setup routes
 	routes.SetupRoutes(app, authHandler)
 
 	// Start the server
-	app.Listen(":3000")
+	app.Listen(":4444")
 }
