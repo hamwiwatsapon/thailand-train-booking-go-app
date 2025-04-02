@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
 )
 
 // Secret key for signing JWT tokens
@@ -22,26 +24,41 @@ func JWTMiddleware(c *fiber.Ctx) error {
 
 	// Extract the token string
 	tokenString := strings.TrimPrefix(tokenHeader, "Bearer ")
-
+	fmt.Print("Token: ", tokenString)
 	// Parse and validate the token
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		// Ensure the signing method is HMAC
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid signing method")
-		}
-		return secretKey, nil
-	})
-
-	if err != nil || !token.Valid {
+	token, err := services.ValidateToken(tokenString)
+	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid or expired token",
+			"error": "Invalid token",
 		})
 	}
 
-	// Extract claims and set them in the context (optional)
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		c.Locals("userID", claims["user_id"])
-		c.Locals("role", claims["role"])
+	// Check if the token is valid and not expired
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// Extract user ID and role from the claims
+		userIDFloat, ok := claims["user"].(float64)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid user ID in token",
+			})
+		}
+		userID := uint(userIDFloat)
+		role, ok := claims["role"].(string)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid role in token",
+			})
+		}
+
+		// Check if the role is valid
+		if role != "admin" && role != "user" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid role in token",
+			})
+		}
+		// Store user ID and role in context locals for later use
+		c.Locals("userID", userID)
+		c.Locals("role", role)
 	}
 
 	// Proceed to the next handler

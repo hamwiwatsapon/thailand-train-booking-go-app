@@ -18,14 +18,14 @@ func NewDatabase() *Database {
 }
 
 // Connect establishes a connection to the SQLite database.
-func (db *Database) Connect() error {
+func (db *Database) Connect() (*gorm.DB, error) {
 	var err error
 	db.DB, err = gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	log.Println("Database connection established successfully.")
-	return nil
+	return db.DB, nil
 }
 
 // Migrate applies database migrations for the specified entities.

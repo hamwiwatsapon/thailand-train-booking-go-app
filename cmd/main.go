@@ -3,11 +3,10 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
+	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/database"
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/repository"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/routes"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -15,10 +14,14 @@ func main() {
 	app := fiber.New()
 
 	// Initialize database
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	dbInstance := database.NewDatabase()
+	db, err := dbInstance.Connect()
 	if err != nil {
+		dbInstance.Close()
 		panic("failed to connect to database")
 	}
+
+	dbInstance.Migrate()
 
 	// Initialize repository, service, and handler
 	authRepo := repository.NewAuthRepository(db)

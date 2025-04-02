@@ -59,7 +59,7 @@ func (a *authRepository) DeleteUser(id uint) error {
 
 func (a *authRepository) GetUserByEmail(email string) (entities.User, error) {
 	var user entities.User
-	err := a.db.Select("id", "email", "role").Where("email = ?", email).First(&user).Error
+	err := a.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return entities.User{}, fmt.Errorf("user with email %s not found", email)
