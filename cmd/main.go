@@ -1,15 +1,33 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
+	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/repository"
+	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
+	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/routes"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
 
 func main() {
-	// Main function to start the application
-	// Initialize the application, set up routes, and start the server
+	// Initialize Fiber app
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	// Initialize database
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect to database")
+	}
 
-	app.Listen(":4444")
+	// Initialize repository, service, and handler
+	authRepo := repository.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
+	// Setup routes
+	routes.SetupRoutes(app, authHandler)
+
+	// Start the server
+	app.Listen(":3000")
 }
