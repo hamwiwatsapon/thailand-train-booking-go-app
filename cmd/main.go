@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/database"
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/repository"
@@ -12,6 +13,12 @@ import (
 func main() {
 	// Initialize Fiber app
 	app := fiber.New()
+
+	// Enable CORS for localhost:3000
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:3000",
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+	}))
 
 	// Initialize database
 	dbInstance := database.NewDatabase()
@@ -28,7 +35,6 @@ func main() {
 	authService := services.NewAuthService(authRepo)
 	authHandler := handlers.NewAuthHandler(authService)
 
-	// Setup routes
 	// Add logging middleware
 	app.Use(func(c *fiber.Ctx) error {
 		println("Request:", c.Method(), c.Path())

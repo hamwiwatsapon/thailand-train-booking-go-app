@@ -57,7 +57,7 @@ func (s *AuthService) LoginUser(email, password string) (string, string, error) 
 		return "", "", errors.New("invalid email or password")
 	}
 
-	token, refreshToken, err := GenerateToken(user.ID, user.Role)
+	token, refreshToken, err := GenerateToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return "", "", errors.New("failed to generate token")
 	}

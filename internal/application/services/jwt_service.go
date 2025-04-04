@@ -9,10 +9,11 @@ import (
 
 var jwtSecret = []byte("your-secret-key") // Replace with a secure secret key
 
-func GenerateToken(userID uint, role string) (string, string, error) {
+func GenerateToken(userID uint, email, role string) (string, string, error) {
 	// Define access token claims
 	accessTokenClaims := jwt.MapClaims{
 		"user":    userID,
+		"email":   email,
 		"role":    role,
 		"refresh": false,
 		"exp":     time.Now().Add(time.Minute * 15).Unix(), // Access token expires in 15 Minutes
@@ -28,6 +29,7 @@ func GenerateToken(userID uint, role string) (string, string, error) {
 	// Define refresh token claims
 	refreshTokenClaims := jwt.MapClaims{
 		"user":    userID,
+		"email":   email, // Add email to refresh token claims
 		"refresh": true,
 		"exp":     time.Now().Add(time.Hour * 24 * 3).Unix(), // Refresh token expires in 3 days
 	}
@@ -92,5 +94,5 @@ func RefreshToken(refreshTokenString string) (string, string, error) {
 	userID := uint(userIDFloat)
 
 	// Generate new tokens
-	return GenerateToken(userID, claims["role"].(string))
+	return GenerateToken(userID, claims["email"].(string), claims["role"].(string))
 }

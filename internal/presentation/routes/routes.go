@@ -18,8 +18,10 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 	protected.Get("/profile", func(c *fiber.Ctx) error {
 		userID := c.Locals("userID")
 		role := c.Locals("role")
+		userEmail := c.Locals("userEmail")
 		return c.JSON(fiber.Map{
 			"user_id": userID,
+			"email":   userEmail,
 			"role":    role,
 		})
 	})
