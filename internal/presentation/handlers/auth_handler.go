@@ -89,3 +89,50 @@ func (h *AuthHandler) Refresh(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
+
+func (h *AuthHandler) CheckUser(c *fiber.Ctx) error {
+	type CheckUserRequest struct {
+		Email string `json:"email"`
+	}
+
+	var req CheckUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
+	}
+
+	err := h.service.CheckUserExist(req.Email)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "user exists"})
+}
+
+func (h *AuthHandler) OTPLogin(c *fiber.Ctx) error {
+	type OTPLoginRequest struct {
+		Email string `json:"email"`
+		OTP   string `json:"otp"`
+	}
+
+	type OTPLoginResponse struct {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	var req OTPLoginRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
+	}
+
+	token, refresh, err := h.service.OTPLogin(req.Email, req.OTP)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	response := OTPLoginResponse{
+		Token:        token,
+		RefreshToken: refresh,
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response)
+}

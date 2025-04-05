@@ -13,6 +13,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 	v1.Post("/register", authHandler.Register)
 	v1.Post("/login", authHandler.Login)
 	v1.Post("/refresh-token", authHandler.Refresh)
+	v1.Post("/check-user", authHandler.CheckUser)
 
 	protected := v1.Group("/protected", middleware.JWTMiddleware)
 	protected.Get("/profile", func(c *fiber.Ctx) error {

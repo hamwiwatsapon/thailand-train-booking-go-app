@@ -65,6 +65,40 @@ func (s *AuthService) LoginUser(email, password string) (string, string, error) 
 	return token, refreshToken, nil
 }
 
+func (s *AuthService) CheckUserExist(email string) error {
+	// Check if the user exists in the database
+	user, err := s.repo.GetUserByEmail(email)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	if user.ID == 0 {
+		return errors.New("user not found")
+	}
+
+	return nil
+}
+
+func (s *AuthService) OTPLogin(email, otp string) (string, string, error) {
+	// Fetch the user by email
+	user, err := s.repo.GetUserByEmail(email)
+	if err != nil {
+		return "", "", errors.New("invalid email or OTP")
+	}
+
+	// Validate the OTP (this is just a placeholder, implement your own OTP validation logic)
+	if otp != "123456" {
+		return "", "", errors.New("invalid OTP")
+	}
+
+	token, responseToken, err := GenerateToken(user.ID, user.Email, user.Role)
+	if err != nil {
+		return "", "", errors.New("failed to generate token")
+	}
+
+	return token, responseToken, nil
+}
+
 func (s *AuthService) GetNewToken(refreshToken string) (string, string, error) {
 	// Validate the token and extract the user ID
 	token, refreshToken, err := RefreshToken(refreshToken)
