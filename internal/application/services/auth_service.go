@@ -76,6 +76,16 @@ func (s *AuthService) CheckUserExist(email string) error {
 		return errors.New("user not found")
 	}
 
+	otp, err := GenerateOTP(email)
+	if err != nil {
+		return errors.New("failed to generate OTP")
+	}
+
+	err = SendOTPEmail(email, otp)
+	if err != nil {
+		return errors.New("failed to send OTP email")
+	}
+
 	return nil
 }
 
@@ -87,8 +97,9 @@ func (s *AuthService) OTPLogin(email, otp string) (string, string, error) {
 	}
 
 	// Validate the OTP (this is just a placeholder, implement your own OTP validation logic)
-	if otp != "123456" {
-		return "", "", errors.New("invalid OTP")
+	validate, err := ValidateOTP(email, otp)
+	if err != nil || !validate {
+		return "", "", errors.New("invalid email or OTP")
 	}
 
 	token, responseToken, err := GenerateToken(user.ID, user.Email, user.Role)

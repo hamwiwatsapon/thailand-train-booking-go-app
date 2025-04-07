@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
@@ -8,16 +11,22 @@ import (
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/repository"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/routes"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+
 	// Initialize Fiber app
 	app := fiber.New()
 
 	// Enable CORS for localhost:3000
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:3000",
-		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowOrigins:     os.Getenv("FRONTEND_URL"),
+		AllowCredentials: true,
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 	}))
 
 	// Initialize database

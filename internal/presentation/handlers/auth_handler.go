@@ -20,17 +20,31 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Role     string `json:"role"`
 	}
 
+	type RegisterReponse struct {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}
 	var req RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
-	user, err := h.service.RegisterUser(req.Email, req.Password, req.Role)
+	_, err := h.service.RegisterUser(req.Email, req.Password, req.Role)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(user)
+	token, refresh, err := h.service.LoginUser(req.Email, req.Password)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	response := RegisterReponse{
+		Token:        token,
+		RefreshToken: refresh,
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (h *AuthHandler) Login(c *fiber.Ctx) error {

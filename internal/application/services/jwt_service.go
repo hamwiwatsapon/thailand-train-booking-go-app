@@ -1,16 +1,14 @@
 package services
 
 import (
-	"crypto/rand"
-	"encoding/binary"
 	"errors"
-	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("your-secret-key") // Replace with a secure secret key
+var jwtSecret = []byte(os.Getenv("SECRET_KEY")) // Replace with a secure secret key
 
 func GenerateToken(userID uint, email, role string) (string, string, error) {
 	// Define access token claims
@@ -61,6 +59,12 @@ func ValidateToken(tokenString string) (*jwt.Token, error) {
 		return nil, errors.New("invalid token")
 	}
 
+	// Check if the token has expired
+	exp, ok := token.Claims.(jwt.MapClaims)["exp"].(float64)
+	if !ok || time.Unix(int64(exp), 0).Before(time.Now()) {
+		return nil, errors.New("token has expired")
+	}
+
 	return token, nil
 }
 
@@ -98,56 +102,4 @@ func RefreshToken(refreshTokenString string) (string, string, error) {
 
 	// Generate new tokens
 	return GenerateToken(userID, claims["email"].(string), claims["role"].(string))
-}
-
-func GenerateOTP(email string) (string, string, error) {
-	// Generate a cryptographically secure random 6-digit OTP
-	var otpInt uint32
-	if err := binary.Read(rand.Reader, binary.LittleEndian, &otpInt); err != nil {
-		return "", "", errors.New("failed to generate secure OTP")
-	}
-	otp := fmt.Sprintf("%06d", otpInt%1000000)
-
-	// Define OTP token claims
-	otpTokenClaims := jwt.MapClaims{
-		"email": email,
-		"otp":   otp,
-		"exp":   time.Now().Add(time.Minute * 5).Unix(), // OTP expires in 5 minutes
-	}
-
-	// Create OTP token
-	otpToken := jwt.NewWithClaims(jwt.SigningMethodHS256, otpTokenClaims)
-	otpTokenString, err := otpToken.SignedString(jwtSecret)
-	if err != nil {
-		return "", "", errors.New("failed to sign OTP token")
-	}
-
-	return otp, otpTokenString, nil
-}
-
-func CompareOTP(otpTokenString, otp string) (bool, error) {
-	// Validate the OTP token
-	token, err := ValidateToken(otpTokenString)
-	if err != nil {
-		return false, errors.New("invalid or expired OTP token")
-	}
-
-	// Extract claims from the token
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return false, errors.New("invalid OTP token claims")
-	}
-
-	// Check if the token has expired
-	exp, ok := claims["exp"].(float64)
-	if !ok || time.Unix(int64(exp), 0).Before(time.Now()) {
-		return false, errors.New("OTP token has expired")
-	}
-
-	// Check if the OTP matches
-	if claims["otp"] != otp {
-		return false, errors.New("provided OTP does not match")
-	}
-
-	return true, nil
 }

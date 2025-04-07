@@ -2,9 +2,10 @@ package database
 
 import (
 	"log"
+	"os"
 
 	"github.com/hamwiwatsapon/train-booking-go/internal/domain/entities"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,8 @@ func NewDatabase() *Database {
 // Connect establishes a connection to the SQLite database.
 func (db *Database) Connect() (*gorm.DB, error) {
 	var err error
-	db.DB, err = gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
+	db.DB, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{
+		SkipDefaultTransaction: true})
 	if err != nil {
 		return nil, err
 	}
