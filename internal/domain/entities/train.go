@@ -47,11 +47,30 @@ type TrainStation struct {
 	Code string `json:"code" gorm:"primaryKey;not null;uniqueIndex"`
 	Name string `json:"name" gorm:"not null"`
 
+	Province    string `json:"province" gorm:"not null"`
+	District    string `json:"district" gorm:"not null"`
+	SubDistrict string `json:"sub_district" gorm:"not null"`
+	PostalCode  string `json:"postal_code" gorm:"not null"`
+	Latitude    string `json:"latitude" gorm:"not null"`
+	Longitude   string `json:"longitude" gorm:"not null"`
+
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
 	User      User           `gorm:"foreignKey:ModifyBy;references:ID"`
+}
+
+type StationType struct {
+	Code string `json:"code" gorm:"primaryKey;not null;index"`
+	Name string `json:"name" gorm:"not null"`
+
+	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+
+	ModifyBy uint `json:"modify_by" gorm:"not null"`
+	User     User `gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 // StationOrder represents an ordered set of stations for a train route.
