@@ -16,20 +16,28 @@ var redisClient = redis.NewClient(&redis.Options{
 })
 
 // Generate OTP and store it in Redis
-func GenerateOTP(email string) (string, error) {
+func GenerateOTP(email string) (string, string, error) {
 	var otpInt uint32
 	if err := binary.Read(rand.Reader, binary.LittleEndian, &otpInt); err != nil {
-		return "", fmt.Errorf("failed to generate OTP: %v", err)
+		return "", "", fmt.Errorf("failed to generate OTP: %v", err)
 	}
 	otp := fmt.Sprintf("%06d", otpInt%1000000)
 
-	// Store OTP in Redis with a 5-minute expiration
-	err := redisClient.Set(ctx, email, otp, 5*time.Minute).Err()
+	// Generate a random reference string for the OTP
+	refBytes := make([]byte, 4)
+	if _, err := rand.Read(refBytes); err != nil {
+		return "", "", fmt.Errorf("failed to generate reference code: %v", err)
+	}
+	refCode := fmt.Sprintf("%X", refBytes)
+
+	// Store OTP and reference code in Redis with a 5-minute expiration
+	otpWithRef := fmt.Sprintf("%s|%s", otp, refCode)
+	err := redisClient.Set(ctx, email, otpWithRef, 5*time.Minute).Err()
 	if err != nil {
-		return "", fmt.Errorf("failed to store OTP: %v", err)
+		return "", "", fmt.Errorf("failed to store OTP and reference code: %v", err)
 	}
 
-	return otp, nil
+	return otp, refCode, nil
 }
 
 // Validate OTP from Redis

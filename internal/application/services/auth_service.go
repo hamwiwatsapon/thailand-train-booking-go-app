@@ -65,28 +65,28 @@ func (s *AuthService) LoginUser(email, password string) (string, string, error) 
 	return token, refreshToken, nil
 }
 
-func (s *AuthService) CheckUserExist(email string) error {
+func (s *AuthService) CheckUserExist(email string) (string, error) {
 	// Check if the user exists in the database
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
-		return errors.New("user not found")
+		return "", errors.New("user not found")
 	}
 
 	if user.ID == 0 {
-		return errors.New("user not found")
+		return "", errors.New("user not found")
 	}
 
-	otp, err := GenerateOTP(email)
+	otp, ref, err := GenerateOTP(email)
 	if err != nil {
-		return errors.New("failed to generate OTP")
+		return "", errors.New("failed to generate OTP")
 	}
 
-	err = SendOTPEmail(email, otp)
+	err = SendOTPEmail(email, ref, otp)
 	if err != nil {
-		return errors.New("failed to send OTP email")
+		return "", errors.New("failed to send OTP email")
 	}
 
-	return nil
+	return ref, nil
 }
 
 func (s *AuthService) OTPLogin(email, otp string) (string, string, error) {

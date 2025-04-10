@@ -9,7 +9,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendOTPEmail(email string, otp string) error {
+func SendOTPEmail(email, ref, otp string) error {
 	// SMTP server configuration
 	smtpHost := os.Getenv("SMTP_HOST")     // Replace with your SMTP server
 	smtpPort := os.Getenv("SMTP_PORT")     // Replace with your SMTP port
@@ -21,8 +21,8 @@ func SendOTPEmail(email string, otp string) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", smtpFrom)
 	message.SetHeader("To", email)
-	message.SetHeader("Subject", "Your OTP Code")
-	message.SetBody("text/plain", fmt.Sprintf("Your OTP code is: %s", otp))
+	message.SetHeader("Subject", "OTP code for verification REF: "+ref)
+	message.SetBody("text/plain", fmt.Sprintf("REF:%s\nYour OTP code is: %s", ref, otp))
 
 	port, err := strconv.Atoi(smtpPort)
 	if err != nil {

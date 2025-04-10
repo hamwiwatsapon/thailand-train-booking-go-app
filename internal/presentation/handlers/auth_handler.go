@@ -109,17 +109,25 @@ func (h *AuthHandler) CheckUser(c *fiber.Ctx) error {
 		Email string `json:"email"`
 	}
 
+	type CheckUserResponse struct {
+		ReferenceCodestring string `json:"reference_code"`
+	}
+
 	var req CheckUserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
-	err := h.service.CheckUserExist(req.Email)
+	ref, err := h.service.CheckUserExist(req.Email)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "user exists"})
+	response := CheckUserResponse{
+		ReferenceCodestring: ref,
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func (h *AuthHandler) OTPLogin(c *fiber.Ctx) error {
