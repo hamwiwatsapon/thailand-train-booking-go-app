@@ -44,7 +44,7 @@ type TrainType struct {
 
 // TrainStation represents a train station.
 type TrainStation struct {
-	Code string `json:"code" gorm:"primaryKey;not null;uniqueIndex"`
+	Code string `json:"code" gorm:"primaryKey;not null;index"`
 	Name string `json:"name" gorm:"not null"`
 
 	Province    string `json:"province" gorm:"not null"`
