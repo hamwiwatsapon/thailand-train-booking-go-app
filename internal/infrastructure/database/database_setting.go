@@ -32,9 +32,20 @@ func (db *Database) Connect() (*gorm.DB, error) {
 
 // Migrate applies database migrations for the specified entities.
 func (db *Database) Migrate() error {
-	if err := db.DB.AutoMigrate(&entities.User{}); err != nil {
+	err := db.DB.AutoMigrate(
+		&entities.User{},
+		// &entities.Train{},
+		// &entities.TrainType{},
+		&entities.TrainStation{},
+		&entities.StationType{},
+		// &entities.StationOrder{},
+		// &entities.StationOrderDetail{},
+	)
+
+	if err != nil {
 		return err
 	}
+
 	log.Println("Database migration completed successfully.")
 	return nil
 }

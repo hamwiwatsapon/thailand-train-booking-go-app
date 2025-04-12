@@ -2,29 +2,44 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/middleware"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
 )
 
-func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
-	v1 := app.Group("/api/v1")
-
+func SetupAuthRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 	// Authentication routes
-	v1.Post("/register", authHandler.Register)
-	v1.Post("/login", authHandler.Login)
-	v1.Post("/refresh-token", authHandler.Refresh)
-	v1.Post("/check-user", authHandler.CheckUser)
-	v1.Post("/otp-login", authHandler.OTPLogin)
+	app.Post("/register", authHandler.Register)
+	app.Post("/login", authHandler.Login)
+	app.Post("/refresh-token", authHandler.Refresh)
+	app.Post("/check-user", authHandler.CheckUser)
+	app.Post("/otp-login", authHandler.OTPLogin)
+}
 
-	protected := v1.Group("/protected", middleware.JWTMiddleware)
-	protected.Get("/profile", func(c *fiber.Ctx) error {
-		userID := c.Locals("userID")
-		role := c.Locals("role")
-		userEmail := c.Locals("userEmail")
+func SetupProfileRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
+	// Profile routes
+	profile := app.Group("/profile")
+
+	profile.Get("/", func(c *fiber.Ctx) error {
+		userID := c.Locals("user")
+		userRole := c.Locals("role")
+		userEmail := c.Locals("email")
+
+		if userID == nil || userRole == nil || userEmail == nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Unauthorized access",
+			})
+		}
+
 		return c.JSON(fiber.Map{
 			"user_id": userID,
 			"email":   userEmail,
-			"role":    role,
+			"role":    userRole,
 		})
 	})
+}
+
+func SetupTrainRoutes(app fiber.Router, trainHandler *handlers.TrainHandler) {
+	// Station routes
+	station := app.Group("/stations")
+	station.Get("/type", trainHandler.GetTrainTypes)
+	station.Post("/type", trainHandler.CreateTrainType)
 }
