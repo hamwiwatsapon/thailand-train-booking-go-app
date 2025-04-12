@@ -23,9 +23,9 @@ type Train struct {
 	FromStation TrainStation `gorm:"foreignKey:FromStationCode;references:Code"`
 	ToStation   TrainStation `gorm:"foreignKey:ToStationCode;references:Code"`
 
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"` // FK to User
 	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
@@ -35,9 +35,9 @@ type TrainType struct {
 	Code string `json:"code" gorm:"primaryKey;not null;index"`
 	Name string `json:"name" gorm:"not null"`
 
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
 	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
@@ -54,9 +54,9 @@ type TrainStation struct {
 	Latitude    string `json:"latitude"`
 	Longitude   string `json:"longitude"`
 
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
 	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
@@ -65,9 +65,9 @@ type StationType struct {
 	Code string `json:"code" gorm:"primaryKey;not null;index"`
 	Name string `json:"name" gorm:"not null"`
 
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
 	ModifyBy uint  `json:"modify_by" gorm:"not null"`
 	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
