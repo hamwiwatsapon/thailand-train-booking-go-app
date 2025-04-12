@@ -27,7 +27,7 @@ type Train struct {
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"` // FK to User
-	User      User           `gorm:"foreignKey:ModifyBy;references:ID"`
+	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 // TrainType represents different types of trains.
@@ -39,7 +39,7 @@ type TrainType struct {
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
-	User      User           `gorm:"foreignKey:ModifyBy;references:ID"`
+	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 // TrainStation represents a train station.
@@ -58,7 +58,7 @@ type TrainStation struct {
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
-	User      User           `gorm:"foreignKey:ModifyBy;references:ID"`
+	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 type StationType struct {
@@ -81,8 +81,8 @@ type StationOrder struct {
 
 	Stations []StationOrderDetail `json:"stations" gorm:"foreignKey:StationOrderID"`
 
-	ModifyBy uint `json:"modify_by" gorm:"not null"`
-	User     User `gorm:"foreignKey:ModifyBy;references:ID"`
+	ModifyBy uint  `json:"modify_by" gorm:"not null"`
+	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 // StationOrderDetail represents the details of a station in a train route.
@@ -94,6 +94,6 @@ type StationOrderDetail struct {
 
 	Order int `json:"order" gorm:"not null"` // Order in the train route
 
-	ModifyBy uint `json:"modify_by" gorm:"not null"`
-	User     User `gorm:"foreignKey:ModifyBy;references:ID"`
+	ModifyBy uint  `json:"modify_by" gorm:"not null"`
+	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
