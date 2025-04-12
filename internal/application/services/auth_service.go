@@ -114,7 +114,7 @@ func (s *AuthService) GetNewToken(refreshToken string) (string, string, error) {
 	// Validate the token and extract the user ID
 	token, refreshToken, err := RefreshToken(refreshToken)
 	if err != nil {
-		return "", "", errors.New("invalid token")
+		return "", "", err
 	}
 
 	return token, refreshToken, nil

@@ -31,6 +31,7 @@ func GenerateToken(userID uint, email, role string) (string, string, error) {
 	refreshTokenClaims := jwt.MapClaims{
 		"user":    userID,
 		"email":   email, // Add email to refresh token claims
+		"role":    role,
 		"refresh": true,
 		"exp":     time.Now().Add(time.Hour * 24 * 3).Unix(), // Refresh token expires in 3 days
 	}
@@ -100,6 +101,18 @@ func RefreshToken(refreshTokenString string) (string, string, error) {
 	}
 	userID := uint(userIDFloat)
 
+	// Validate email claim
+	email, ok := claims["email"].(string)
+	if !ok || email == "" {
+		return "", "", errors.New("invalid or missing email in refresh token")
+	}
+
+	// Validate role claim
+	role, ok := claims["role"].(string)
+	if !ok || role == "" {
+		return "", "", errors.New("invalid or missing role in refresh token")
+	}
+
 	// Generate new tokens
-	return GenerateToken(userID, claims["email"].(string), claims["role"].(string))
+	return GenerateToken(userID, email, role)
 }

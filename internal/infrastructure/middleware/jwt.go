@@ -24,7 +24,6 @@ func JWTMiddleware(c *fiber.Ctx) error {
 
 	// Extract the token string
 	tokenString := strings.TrimPrefix(tokenHeader, "Bearer ")
-	fmt.Print("Token: ", tokenString)
 	// Parse and validate the token
 	token, err := services.ValidateToken(tokenString)
 	if err != nil {
@@ -42,6 +41,10 @@ func JWTMiddleware(c *fiber.Ctx) error {
 				"error": "Invalid user ID in token",
 			})
 		}
+
+		// Log the extracted user ID for debugging
+		fmt.Printf("Extracted user ID from token: %v\n", userIDFloat)
+
 		userID := uint(userIDFloat)
 		role, ok := claims["role"].(string)
 		if !ok {
@@ -50,15 +53,12 @@ func JWTMiddleware(c *fiber.Ctx) error {
 			})
 		}
 
-		// Check if the role is valid
-		if role != "admin" && role != "user" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid role in token",
-			})
-		}
-		// Store user ID and role in context locals for later use
-		c.Locals("userID", userID)
-		c.Locals("userEmail", claims["email"])
+		// Log the role for debugging
+		fmt.Printf("Extracted role from token: %v\n", role)
+
+		// Store user ID, email, and role in context locals for later use
+		c.Locals("user", userID)
+		c.Locals("email", claims["email"])
 		c.Locals("role", role)
 	}
 
