@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewTrainRepository(db *gorm.DB) interfaces.TrainRepository {
+func NewTrainRepository(db *gorm.DB) interfaces.StationTypeRepository {
 	return &trainRepositoryImpl{db: db}
 }
 

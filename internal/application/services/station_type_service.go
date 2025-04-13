@@ -6,10 +6,10 @@ import (
 )
 
 type TrainService struct {
-	repo interfaces.TrainRepository
+	repo interfaces.StationTypeRepository
 }
 
-func NewTrainService(repo interfaces.TrainRepository) *TrainService {
+func NewTrainService(repo interfaces.StationTypeRepository) *TrainService {
 	return &TrainService{repo: repo}
 }
 

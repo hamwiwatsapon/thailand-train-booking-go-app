@@ -4,7 +4,7 @@ import (
 	"github.com/hamwiwatsapon/train-booking-go/internal/domain/entities"
 )
 
-type TrainRepository interface {
+type StationTypeRepository interface {
 	// TrainStation
 	CreateTrainStation(station entities.TrainStation) (entities.TrainStation, error)
 	BulkCreateTrainStation(stations []entities.TrainStation) ([]entities.TrainStation, error)
