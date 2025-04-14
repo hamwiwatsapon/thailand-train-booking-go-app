@@ -20,13 +20,19 @@ type Train struct {
 	TrainTypeCode string    `json:"train_type_code" gorm:"not null"` // FK to TrainType
 	TrainType     TrainType `json:"train_type" gorm:"foreignKey:TrainTypeCode;references:Code"`
 
+	TrainLineCode string    `json:"train_line_code" gorm:"not null"`
+	TrainLine     TrainLine `json:"train_line" gorm:"foreignKey:TrainLineCode;references:Code"`
+
+	TrainProfitTypeCode string          `json:"train_profit_type_code" gorm:"not null"`
+	TrainProfitType     TrainProfitType `json:"train_profit_type" gorm:"foreignKey:TrainProfitTypeCode;references:Code"`
+
 	FromStation TrainStation `gorm:"foreignKey:FromStationCode;references:Code"`
 	ToStation   TrainStation `gorm:"foreignKey:ToStationCode;references:Code"`
 
 	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	ModifyBy  uint           `json:"modify_by" gorm:"not null"` // FK to User
+	ModifyBy  uint           `json:"-" gorm:"not null"` // FK to User
 	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
@@ -38,8 +44,33 @@ type TrainType struct {
 	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
-	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
+
+	ModifyBy uint  `json:"-" gorm:"not null"`
+	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
+}
+
+type TrainLine struct {
+	Code string `json:"code" gorm:"primaryKey;not null;index"`
+	Name string `json:"name" gorm:"not null"` // SOUTh, NORTH, EAST, WEST, EAST-NORTH, EAST-SOUTH, WEST-NORTH, WEST-SOUTH
+
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	ModifyBy uint  `json:"-" gorm:"not null"`
+	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
+}
+
+type TrainProfitType struct {
+	Code string `json:"code" gorm:"primaryKey;not null;index"`
+	Name string `json:"name" gorm:"not null"` // SOUTh, NORTH, EAST, WEST, EAST-NORTH, EAST-SOUTH, WEST-NORTH, WEST-SOUTH
+
+	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	ModifyBy uint  `json:"-" gorm:"not null"`
+	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
 // TrainStation represents a train station.
@@ -54,10 +85,13 @@ type TrainStation struct {
 	Latitude    string `json:"latitude"`
 	Longitude   string `json:"longitude"`
 
+	StationTypeCode string      `json:"station_type_code" gorm:"not null"` // FK to StationType
+	StationType     StationType `json:"station_type" gorm:"foreignKey:StationTypeCode;references:Code"`
+
 	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	ModifyBy  uint           `json:"modify_by" gorm:"not null"`
+	ModifyBy  uint           `json:"-" gorm:"not null"`
 	User      *User          `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
@@ -69,7 +103,7 @@ type StationType struct {
 	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
-	ModifyBy uint  `json:"modify_by" gorm:"not null"`
+	ModifyBy uint  `json:"-" gorm:"not null"`
 	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
@@ -81,7 +115,7 @@ type StationOrder struct {
 
 	Stations []StationOrderDetail `json:"stations" gorm:"foreignKey:StationOrderID"`
 
-	ModifyBy uint  `json:"modify_by" gorm:"not null"`
+	ModifyBy uint  `json:"-" gorm:"not null"`
 	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }
 
@@ -94,6 +128,6 @@ type StationOrderDetail struct {
 
 	Order int `json:"order" gorm:"not null"` // Order in the train route
 
-	ModifyBy uint  `json:"modify_by" gorm:"not null"`
+	ModifyBy uint  `json:"-" gorm:"not null"`
 	User     *User `json:"user,omitempty" gorm:"foreignKey:ModifyBy;references:ID"`
 }

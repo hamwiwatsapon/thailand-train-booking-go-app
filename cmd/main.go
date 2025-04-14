@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/hamwiwatsapon/train-booking-go/internal/application/services"
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/database"
-	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/middleware"
 	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/repository"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/routes"
@@ -62,13 +61,10 @@ func main() {
 
 	v1 := app.Group("/api/v1")
 
-	// Protected routes under /api/v1
-	protected := v1.Group("/auth", middleware.JWTMiddleware)
-
 	// Setup routes
 	routes.SetupAuthRoutes(v1, authHandler)
-	routes.SetupProfileRoutes(protected, authHandler)
-	routes.SetupTrainRoutes(protected, trainHandler)
+	routes.SetupProfileRoutes(v1, authHandler)
+	routes.SetupStationRoutes(v1, trainHandler)
 
 	// Start the server
 	app.Listen(":4444")

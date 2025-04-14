@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/hamwiwatsapon/train-booking-go/internal/infrastructure/middleware"
 	"github.com/hamwiwatsapon/train-booking-go/internal/presentation/handlers"
 )
 
@@ -16,9 +17,9 @@ func SetupAuthRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 
 func SetupProfileRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 	// Profile routes
-	profile := app.Group("/profile")
+	profile := app.Group("/auth", middleware.JWTMiddleware)
 
-	profile.Get("/", func(c *fiber.Ctx) error {
+	profile.Get("/profile", func(c *fiber.Ctx) error {
 		userID := c.Locals("user")
 		userRole := c.Locals("role")
 		userEmail := c.Locals("email")
@@ -37,9 +38,17 @@ func SetupProfileRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 	})
 }
 
-func SetupTrainRoutes(app fiber.Router, trainHandler *handlers.TrainHandler) {
+func SetupStationRoutes(app fiber.Router, trainHandler *handlers.TrainHandler) {
+	auth := app.Group("/auth/stations", middleware.JWTMiddleware)
+
 	// Station routes
 	station := app.Group("/stations")
-	station.Get("/type", trainHandler.GetTrainTypes)
-	station.Post("/type", trainHandler.CreateTrainType)
+	station.Get("/", trainHandler.GetStations)
+	auth.Post("/bulk", trainHandler.BulkCreateStation)
+
+	// Station types routes
+	station.Get("/type", trainHandler.GetStationTypes)
+	auth.Post("/type", trainHandler.CreateStationType)
+	auth.Put("/type", trainHandler.UpdateStationType)
+	auth.Delete("/type", trainHandler.DeleteStationType)
 }

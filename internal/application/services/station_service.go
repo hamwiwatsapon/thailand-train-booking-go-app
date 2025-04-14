@@ -37,6 +37,7 @@ func (s *TrainService) GetTrainStationByCode(code string) (entities.TrainStation
 	return s.repo.GetTrainStationByCode(code)
 }
 
+// TrainStationType methods
 func (s *TrainService) CreateTrainStationType(stationType entities.StationType) (entities.StationType, error) {
 	return s.repo.CreateTrainStationType(stationType)
 }
