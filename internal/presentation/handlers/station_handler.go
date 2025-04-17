@@ -65,7 +65,8 @@ func (h *TrainHandler) CreateStationType(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create train station type",
+			"error":   "Failed to create train station type",
+			"details": err.Error(), // Optional: Include error details for debugging
 		})
 	}
 	return c.Status(fiber.StatusCreated).JSON(createdStation)
@@ -159,7 +160,6 @@ func (h *TrainHandler) GetStations(c *fiber.Ctx) error {
 
 	// Build filters using a helper function
 	filters := map[string]interface{}{
-		"code":              getQueryParam("code"),
 		"station_type_code": getQueryParam("station_type_code"),
 		"name":              getQueryParam("name"),
 		"postal_code":       getQueryParam("postal_code"),
@@ -185,7 +185,6 @@ func (h *TrainHandler) GetStations(c *fiber.Ctx) error {
 
 func (h *TrainHandler) BulkCreateStation(c *fiber.Ctx) error {
 	type createTrainStationRequest struct {
-		Code            string `json:"code" validate:"required"`
 		Name            string `json:"name" validate:"required"`
 		StationTypeCode string `json:"station_type_code" validate:"required"`
 		PostalCode      string `json:"postal_code"`
@@ -221,7 +220,6 @@ func (h *TrainHandler) BulkCreateStation(c *fiber.Ctx) error {
 	trainStations := make([]entities.TrainStation, len(req))
 	for i, station := range req {
 		trainStations[i] = entities.TrainStation{
-			Code:            station.Code,
 			Name:            station.Name,
 			Province:        station.Province,
 			District:        station.District,

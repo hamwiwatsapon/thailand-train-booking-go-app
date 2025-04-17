@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 
-	"github.com/hamwiwatsapon/train-booking-go/internal/application/utils"
 	"github.com/hamwiwatsapon/train-booking-go/internal/domain/entities"
 	"github.com/hamwiwatsapon/train-booking-go/internal/domain/interfaces"
 	"gorm.io/gorm"
@@ -24,9 +23,9 @@ func (t *trainRepositoryImpl) CreateTrainStation(station entities.TrainStation) 
 		return entities.TrainStation{}, err
 	}
 
-	if err := tx.Where("code = ?", station.Code).First(&entities.User{}).Error; err == nil {
+	if err := tx.Where("id = ?", station.ID).First(&entities.User{}).Error; err == nil {
 		tx.Rollback()
-		return entities.TrainStation{}, fmt.Errorf("train station code %s already exists", station.Code)
+		return entities.TrainStation{}, fmt.Errorf("train station code %d already exists", station.ID)
 	}
 
 	if err := tx.Create(&station).Error; err != nil {
@@ -38,7 +37,7 @@ func (t *trainRepositoryImpl) CreateTrainStation(station entities.TrainStation) 
 }
 
 // DeleteTrainStation implements interfaces.TrainRepository.
-func (t *trainRepositoryImpl) DeleteTrainStation(code string) error {
+func (t *trainRepositoryImpl) DeleteTrainStation(id uint) error {
 	// Start a transaction
 	tx := t.db.Begin()
 	if err := tx.Error; err != nil {
@@ -46,10 +45,10 @@ func (t *trainRepositoryImpl) DeleteTrainStation(code string) error {
 	}
 
 	// Check if the user exists and delete in one step
-	if err := tx.Where("code = ?", code).Delete(&entities.TrainStation{}).Error; err != nil {
+	if err := tx.Where("id = ?", id).Delete(&entities.TrainStation{}).Error; err != nil {
 		tx.Rollback()
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("train station code %s not found", code)
+			return fmt.Errorf("train station code %d not found", id)
 		}
 		return err
 	}
@@ -65,7 +64,10 @@ func (t *trainRepositoryImpl) GetTrainStations(filters map[string]interface{}) (
 	// Apply filters to the query
 	query := t.db.Model(&entities.TrainStation{})
 	for key, value := range filters {
-		query = query.Where(fmt.Sprintf("%s = ?", key), value)
+		if value != "" && value != nil {
+			// Use the key and value to filter the query
+			query = query.Where(fmt.Sprintf("%s = ?", key), value)
+		}
 	}
 
 	if err := query.Find(&trainStations).Error; err != nil {
@@ -79,27 +81,27 @@ func (t *trainRepositoryImpl) GetTrainStations(filters map[string]interface{}) (
 func (t *trainRepositoryImpl) UpdateTrainStation(station entities.TrainStation) (entities.TrainStation, error) {
 	// Check if the user exists
 	var existingTrainStation entities.TrainStation
-	if err := t.db.Where("code = ?", station.Code).First(&existingTrainStation).Error; err != nil {
+	if err := t.db.Where("id = ?", station.ID).First(&existingTrainStation).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return entities.TrainStation{}, fmt.Errorf("train station with code %s not found", station.Code)
+			return entities.TrainStation{}, fmt.Errorf("train station with id %d not found", station.ID)
 		}
-		return entities.TrainStation{}, fmt.Errorf("failed to fetch train station with code %s: %w", station.Code, err)
+		return entities.TrainStation{}, fmt.Errorf("failed to fetch train station with code %d: %w", station.ID, err)
 	}
 
 	// Update the user
 	if err := t.db.Model(&existingTrainStation).Updates(station).Error; err != nil {
-		return entities.TrainStation{}, fmt.Errorf("failed to update train station with code %s: %w", station.Code, err)
+		return entities.TrainStation{}, fmt.Errorf("failed to update train station with code %d: %w", station.ID, err)
 	}
 
 	return existingTrainStation, nil
 }
 
 // GetTrainStationByCode implements interfaces.TrainRepository.
-func (t *trainRepositoryImpl) GetTrainStationByCode(code string) (entities.TrainStation, error) {
+func (t *trainRepositoryImpl) GetTrainStationById(id uint) (entities.TrainStation, error) {
 	var trainStation entities.TrainStation
 
-	if err := t.db.Where("code = ?", code).First(&entities.User{}).Error; err != nil {
-		return entities.TrainStation{}, fmt.Errorf("failed to fetch train station with code %s: %w", code, err)
+	if err := t.db.Where("id = ?", id).First(&entities.User{}).Error; err != nil {
+		return entities.TrainStation{}, fmt.Errorf("failed to fetch train station with code %d: %w", id, err)
 	}
 
 	return trainStation, nil
@@ -112,24 +114,6 @@ func (t *trainRepositoryImpl) BulkCreateTrainStation(stations []entities.TrainSt
 	tx := t.db.Begin()
 	if err := tx.Error; err != nil {
 		return nil, err
-	}
-
-	existingCodes := make(map[string]struct{})
-	for _, station := range stations {
-		existingCodes[station.Code] = struct{}{}
-	}
-
-	var existingStations []entities.TrainStation
-	if err := tx.Where("code IN ?", utils.GetKeys(existingCodes)).Find(&existingStations).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	for _, existingStation := range existingStations {
-		if _, exists := existingCodes[existingStation.Code]; exists {
-			tx.Rollback()
-			return nil, fmt.Errorf("train station code %s already exists", existingStation.Code)
-		}
 	}
 
 	if err := tx.Create(&stations).Error; err != nil {
@@ -147,7 +131,7 @@ func (t *trainRepositoryImpl) CreateTrainStationType(stationType entities.Statio
 		return entities.StationType{}, err
 	}
 
-	if err := tx.Where("code = ?", stationType.Code).First(&entities.TrainStation{}).Error; err == nil {
+	if err := tx.Where("code = ?", stationType.Code).First(&entities.StationType{}).Error; err == nil {
 		tx.Rollback()
 		return entities.StationType{}, fmt.Errorf("train station type code %s already exists", stationType.Code)
 	}

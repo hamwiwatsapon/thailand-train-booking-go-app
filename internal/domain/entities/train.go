@@ -75,7 +75,7 @@ type TrainProfitType struct {
 
 // TrainStation represents a train station.
 type TrainStation struct {
-	Code string `json:"code" gorm:"primaryKey;not null;index"`
+	ID   uint   `json:"id" gorm:"primaryKey;not null;index;autoIncrement"`
 	Name string `json:"name" gorm:"not null"`
 
 	Province    string `json:"province" gorm:"not null"`
@@ -86,7 +86,7 @@ type TrainStation struct {
 	Longitude   string `json:"longitude"`
 
 	StationTypeCode string      `json:"station_type_code" gorm:"not null"` // FK to StationType
-	StationType     StationType `json:"station_type" gorm:"foreignKey:StationTypeCode;references:Code"`
+	StationType     StationType `json:"-" gorm:"foreignKey:StationTypeCode;references:Code"`
 
 	CreatedAt time.Time      `json:"-" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"-" gorm:"autoUpdateTime"`

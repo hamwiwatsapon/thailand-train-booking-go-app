@@ -9,9 +9,9 @@ type StationTypeRepository interface {
 	CreateTrainStation(station entities.TrainStation) (entities.TrainStation, error)
 	BulkCreateTrainStation(stations []entities.TrainStation) ([]entities.TrainStation, error)
 	UpdateTrainStation(station entities.TrainStation) (entities.TrainStation, error)
-	DeleteTrainStation(code string) error
+	DeleteTrainStation(id uint) error
 	GetTrainStations(filters map[string]interface{}) ([]entities.TrainStation, error)
-	GetTrainStationByCode(code string) (entities.TrainStation, error)
+	GetTrainStationById(id uint) (entities.TrainStation, error)
 
 	// TrainStationType
 	CreateTrainStationType(stationType entities.StationType) (entities.StationType, error)

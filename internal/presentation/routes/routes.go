@@ -17,7 +17,7 @@ func SetupAuthRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 
 func SetupProfileRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 	// Profile routes
-	profile := app.Group("/auth", middleware.JWTMiddleware)
+	profile := app.Group("/auth")
 
 	profile.Get("/profile", func(c *fiber.Ctx) error {
 		userID := c.Locals("user")
@@ -39,14 +39,16 @@ func SetupProfileRoutes(app fiber.Router, authHandler *handlers.AuthHandler) {
 }
 
 func SetupStationRoutes(app fiber.Router, trainHandler *handlers.TrainHandler) {
-	auth := app.Group("/auth/stations", middleware.JWTMiddleware)
 
-	// Station routes
+	// Public station routes (no middleware)
 	station := app.Group("/stations")
 	station.Get("/", trainHandler.GetStations)
+
+	// Protected station routes (with middleware)
+	auth := app.Group("/auth/stations", middleware.JWTMiddleware)
 	auth.Post("/bulk", trainHandler.BulkCreateStation)
 
-	// Station types routes
+	// Protected station type routes
 	station.Get("/type", trainHandler.GetStationTypes)
 	auth.Post("/type", trainHandler.CreateStationType)
 	auth.Put("/type", trainHandler.UpdateStationType)
